@@ -1,4 +1,4 @@
-// Copyright 2012 The Golight Authors. All rights reserved.
+// Copyright 2017 The Golight Authors. All rights reserved.
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
@@ -9,7 +9,7 @@ import (
 )
 
 // Router impliments http handler registration
-// usage example:
+// Usage example:
 // http.Handle("/query", router.Router{"GET":getHandler, "POST":postHandler})
 // In case there is no handler found, http status code 501 is returned
 // Refer to https://golang.org/src/net/http/method.go for supported methods
