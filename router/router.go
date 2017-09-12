@@ -21,6 +21,6 @@ func (rt Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if handler:=rt[r.Method]; handler != nil {
 		handler.ServeHTTP(w,r)
 	} else {
-		http.Error(w, "", 501)
+		http.Error(w, http.StatusText(501), 501)
 	}
 }
