@@ -21,6 +21,18 @@ func (rt Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if handler:=rt[r.Method]; handler != nil {
 		handler.ServeHTTP(w,r)
 	} else {
-		http.Error(w, http.StatusText(501), 501)
+		//http.Error(w, http.StatusText(501), 501)
+		allow := []string{}
+		for k := range rt {
+			allow = append(allow, k)
+		}
+		sort.Strings(allow)
+		w.Header().Set("Allow", strings.Join(allow, ", "))
+		if req.Method == "OPTIONS" {
+			w.WriteHeader(http.StatusOK)
+		} else {
+			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), 
+				http.StatusMethodNotAllowed)
+		}
 	}
 }
