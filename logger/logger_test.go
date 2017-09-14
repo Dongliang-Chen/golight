@@ -14,8 +14,8 @@ func TestPrint(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
 		out := &bytes.Buffer{}
 		log := New(out, false)
-		log.Print("hello world", 23, LogObj{"a":"a", "b":LogObj{"c":"c","d":[]int{1,2,3}}})	
-		tResults("TestPrint", `{"l":"debug","m":"hello world23 map[a:a b:map[c:c d:[1 2 3]]]"}`+"\n", out, t)
+		log.Print("hello world", 23)	
+		tResults("TestPrint", `{"l":"debug","m":"hello world23"}`+"\n", out, t)
 	})
 	t.Run("Empty", func(t *testing.T) {
 		out := &bytes.Buffer{}
@@ -223,7 +223,7 @@ func TestAddKV(t *testing.T) {
 			AddKV("int32", []int32{32,33}).
 			AddKV("int64", []int64{64,65}).
 			AddKV("uint", []uint{1,2}).
-			//AddKV("uint8", []uint8{8,9}).
+			AddKV("uint8", []uint8{8,9}).
 			AddKV("uint16", []uint16{16,17}).
 			AddKV("uint32", []uint32{32,33}).
 			AddKV("uint64", []uint64{64,65}).
@@ -232,7 +232,7 @@ func TestAddKV(t *testing.T) {
 			AddKV("time", []time.Time{time.Time{},time.Time{}}).
 			AddKV("duration", []time.Duration{1*time.Second, 2*time.Second})
 		log.Print("TestAddKV")	
-		tResults("TestAddArray", `{"l":"debug","string":["str1","str2"],"bool":[true,false],"int":[-1,2],"int8":[8,9],"int16":[16,17],"int32":[32,33],"int64":[64,65],"uint":[1,2],"uint16":[16,17],"uint32":[32,33],"uint64":[64,65],"float32":[32.32,33.33],"float64":[64.64,65.65],"time":["0001-01-01T00:00:00Z","0001-01-01T00:00:00Z"],"duration":[1000,2000],"m":"TestAddKV"}`+"\n", out, t)
+		tResults("TestAddArray", `{"l":"debug","string":["str1","str2"],"bool":[true,false],"int":[-1,2],"int8":[8,9],"int16":[16,17],"int32":[32,33],"int64":[64,65],"uint":[1,2],"uint8":[8,9],"uint16":[16,17],"uint32":[32,33],"uint64":[64,65],"float32":[32.32,33.33],"float64":[64.64,65.65],"time":["0001-01-01T00:00:00Z","0001-01-01T00:00:00Z"],"duration":[1000,2000],"m":"TestAddKV"}`+"\n", out, t)
 	})
 	t.Run("EmptyArray", func(t *testing.T) {
 		out := &bytes.Buffer{}
