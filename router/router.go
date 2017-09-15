@@ -16,7 +16,26 @@ import (
 // In case there is no handler found, http status code 501 is returned
 // Refer to https://golang.org/src/net/http/method.go for supported methods
 //          https://golang.org/pkg/net/http/ for overall http information
+//
+// Below is a simple HTTP server:
+/*
+//Get Http request handler function
+var getHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("GetTestResponse"))
+})
 
+//Post http request handler function
+var postHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	w.Write([]byte("PostTestResponse"))
+})
+
+func main() {
+	mux := http.NewServeMux()
+	mux.Handle("/test", Router{"GET":getHandler, "POST":postHandler})
+	log.Println("Listening on port 8080...")
+	log.Println(http.ListenAndServe(":8080", mux))
+}
+*/
 type Router map[string]http.Handler
 
 func (rt Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
