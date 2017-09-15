@@ -6,6 +6,8 @@ package router
 
 import (
 	"net/http"
+	"sort"
+	"strings"
 )
 
 // Router impliments http handler registration
@@ -28,7 +30,7 @@ func (rt Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 		sort.Strings(allow)
 		w.Header().Set("Allow", strings.Join(allow, ", "))
-		if req.Method == "OPTIONS" {
+		if r.Method == "OPTIONS" {
 			w.WriteHeader(http.StatusOK)
 		} else {
 			http.Error(w, http.StatusText(http.StatusMethodNotAllowed), 
