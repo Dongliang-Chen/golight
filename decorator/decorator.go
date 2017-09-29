@@ -5,9 +5,7 @@
 package decorator
 
 import (
-	"net/http"
-	"github.com/dlmc/golight/router"
-
+	"github.com/dlmc/golight/ghttp"
 )
 
 // Having been researching the middleware / decorator pattern...
@@ -74,7 +72,7 @@ func ExampleDecorator(key, value string) Decorator {
 
 // Decordator is a func that takes an http.Handler and returns an http.Handler.
 // Refer to decorator_test for details of the use cases.
-type Decorator func(http.Handler) http.Handler 
+type Decorator func(ghttp.Handler) ghttp.Handler 
 
 
 // Decorate decorates the http.Handler with a list of Decorators and 
@@ -98,7 +96,7 @@ type Decorator func(http.Handler) http.Handler
 	after d1
 */ 
 // Refer to decorator_test for addtional info.
-func Decorate(h http.Handler, decorators ...Decorator) http.Handler {
+func Decorate(h ghttp.Handler, decorators ...Decorator) ghttp.Handler {
 	for _, d := range decorators {
 		h = d(h)
 	}
@@ -107,7 +105,7 @@ func Decorate(h http.Handler, decorators ...Decorator) http.Handler {
 
 // DecorateRouter decorates each http.Handler in the router with the decorators list
 // and returns the decorated router.
-func DecorateRouter(r router.Router, decorators ...Decorator) router.Router {
+func DecorateRouter(r ghttp.Router, decorators ...Decorator) ghttp.Router {
 	for k,v := range r {
 		r[k] = Decorate(v, decorators...)
 	}
@@ -125,13 +123,13 @@ func Chain(decorators ...Decorator) DecoratorChain {
 
 // Decorate decortoes an http.Handler with the given DecoratorChain
 // and returns the decorated http Handler.
-func (dc DecoratorChain) Decorate(h http.Handler) http.Handler {
+func (dc DecoratorChain) Decorate(h ghttp.Handler) ghttp.Handler {
 	return Decorate(h, dc...)
 }
 
 // DecorateRouter decorates each http.Handler in the router with the 
 // given DecoratorChain and returns the decorated router.
-func (dc DecoratorChain) DecorateRouter(r router.Router) router.Router {
+func (dc DecoratorChain) DecorateRouter(r ghttp.Router) ghttp.Router {
 	return DecorateRouter(r, dc...)
 }
 

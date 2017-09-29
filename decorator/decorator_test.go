@@ -10,27 +10,29 @@ import (
 	"io/ioutil"
 	"net/http/httptest"
 	"github.com/dlmc/golight/decorator"
-	"github.com/dlmc/golight/router"
-
+	"github.com/dlmc/golight/ghttp"
 )
 
 //An Http request handler function
-var th = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("HandlerFunc\n"))
+var th = ghttp.HandlerFunc(func(c ghttp.Ctx, h *ghttp.Http) ghttp.Ctx {
+	h.W.Write([]byte("HandlerFunc\n"))
+	return c
 })
 
 //Another http request handler function
-var th1 = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("HandlerFunc1\n"))
+var th1 = ghttp.HandlerFunc(func(c ghttp.Ctx, h *ghttp.Http) ghttp.Ctx {
+	h.W.Write([]byte("HandlerFunc1\n"))
+	return c
 })
 
 //Simple Decorator
 func tDecorator(tag string) decorator.Decorator {
-	return func(h http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			w.Write([]byte("before " + tag))
-			h.ServeHTTP(w, r)
-			w.Write([]byte("after " + tag))
+	return func(hdl ghttp.Handler) ghttp.Handler {
+		return ghttp.HandlerFunc(func(c ghttp.Ctx, h *ghttp.Http) ghttp.Ctx {
+			h.W.Write([]byte("before " + tag))
+			c = hdl.ServeHTTPWithCtx(c, h)
+			h.W.Write([]byte("after " + tag))
+			return c
 		})
 	}
 }
@@ -44,14 +46,14 @@ func fEqual(f1, f2 interface{}) bool {
 }
 
 //Process test results
-func tResult(t *testing.T, h http.Handler, want string) {
+func tResult(t *testing.T, h ghttp.Handler, want string) {
 	w := httptest.NewRecorder()
 	r, err := http.NewRequest("GET", "/", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	h.ServeHTTP(w, r)
+	h.ServeHTTPWithCtx(nil,  &ghttp.Http{W:w, R:r})
 
 	if got := w.Body.String(); want != got {
 		t.Errorf("Decorate handler failed, got: %s, want: %s", got, want)
@@ -60,8 +62,8 @@ func tResult(t *testing.T, h http.Handler, want string) {
 
 //Simple test case for Chain length
 func TestDecoratorChainLen(t *testing.T) {
-	d1 := func(h http.Handler) http.Handler { return nil }
-	d2 := func(h http.Handler) http.Handler { return http.NotFoundHandler() }
+	d1 := func(h ghttp.Handler) ghttp.Handler { return nil }
+	d2 := func(h ghttp.Handler) ghttp.Handler { return nil }
 	c := decorator.Chain(d1, d2)
 
 	if len(c) != 2 {
@@ -184,8 +186,8 @@ func tResultRouter(t *testing.T, res *http.Response, err error, want string) {
 	}
 }
 
-func getRouter() router.Router {
-	return router.Router{
+func getRouter() ghttp.Router {
+	return ghttp.Router{
 		"GET":&StoreDelete{},
 	}
 }
@@ -193,8 +195,9 @@ func getRouter() router.Router {
 type StoreDelete struct {
 }
 
-func (s *StoreDelete) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("HandlerFunc\n"))
+func (s *StoreDelete) ServeHTTPWithCtx(c ghttp.Ctx, h *ghttp.Http) ghttp.Ctx {
+	h.W.Write([]byte("HandlerFunc\n"))
+	return c
 }
 
 func TestDecorateRouter(t *testing.T) {

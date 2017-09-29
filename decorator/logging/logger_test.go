@@ -1,5 +1,5 @@
 
-package logger
+package logging
 
 import (
 	"testing"
@@ -13,13 +13,13 @@ import (
 func TestPrint(t *testing.T) {
 	t.Run("String", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false)
+		log := NewLogger(out)
 		log.Print("hello world", 23)	
 		tResults("TestPrint", `{"l":"debug","m":"hello world23"}`+"\n", out, t)
 	})
 	t.Run("Empty", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false)
+		log := NewLogger(out)
 		log.Print("")	
 		tResults("TestPrint", `{"l":"debug"}`+"\n", out, t)
 	})
@@ -29,13 +29,13 @@ func TestPrint(t *testing.T) {
 func TestPrintf(t *testing.T) {
 	t.Run("Hello", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false)
+		log := NewLogger(out)
 		log.Printf("hello world %v", 23)	
 		tResults("TestPrint", `{"l":"debug","m":"hello world 23"}`+"\n", out, t)
 	})
 	t.Run("Empty", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false)
+		log := NewLogger(out)
 		log.Printf("")	
 		tResults("TestPrint", `{"l":"debug"}`+"\n", out, t)
 	})
@@ -45,7 +45,7 @@ func TestPrintf(t *testing.T) {
 func TestSublogger(t *testing.T) {
 	t.Run("sublogger", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().Str("k0","v0").Str("kk","vv").Logger()
+		log := NewContext(out).Str("k0","v0").Str("kk","vv").Logger()
 		log1 := log.With().Str("k1", "v123").Str("k2", "v2").Logger()
 		
 		log.Print("TestSublogger")
@@ -60,7 +60,7 @@ func TestSublogger(t *testing.T) {
 func TestAddKVIndividual(t* testing.T) {
 	t.Run("string", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Str("string", "string").
 			Strs("strings", []string{"str1","str2"}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -68,7 +68,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("bool", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Bool("bool", true).
 			Bools("bools", []bool{true,false}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -76,7 +76,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("int", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Int("int", -12).
 			Ints("ints", []int{10,-11}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -84,7 +84,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("int8", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Int8("int8", -12).
 			Ints8("ints8", []int8{10,-11}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -92,7 +92,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("int16", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Int16("int16", -12).
 			Ints16("ints16", []int16{10,-11}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -100,7 +100,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("int32", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Int32("int32", -12).
 			Ints32("ints32", []int32{10,-11}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -108,7 +108,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("int64", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Int64("int64", -12).
 			Ints64("ints64", []int64{10,-11}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -116,7 +116,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("uint8", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Uint8("uint8", 12).
 			Uints8("uints8", []uint8{123,124}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -124,7 +124,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("uint16", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Uint16("uint16", 12).
 			Uints16("uints16", []uint16{123,124}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -132,7 +132,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("uint32", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Uint32("uint32", 12).
 			Uints32("uints32", []uint32{123,124}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -140,7 +140,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("uint64", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Uint64("uint64", 12).
 			Uints64("uints64", []uint64{123,124}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -148,7 +148,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("float32", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Float32("float32", 12.32).
 			Floats32("float32", []float32{-123,124.1}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -156,7 +156,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("float64", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Float64("float64", 12.32).
 			Floats64("float64", []float64{-123,124.1}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -164,7 +164,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("time", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Time("time", time.Time{}).
 			Times("time", []time.Time{time.Time{},time.Time{}}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -172,7 +172,7 @@ func TestAddKVIndividual(t* testing.T) {
 	})
 	t.Run("duration", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Dur("duration", 1*time.Second).
 			Durs("duration",  []time.Duration{1*time.Second, 2*time.Second}).Logger()
 		log.Print("TestAddKVIndividual")	
@@ -184,7 +184,7 @@ func TestAddKVIndividual(t* testing.T) {
 func TestAddKV(t *testing.T) {
 	t.Run("Single", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Str("string", "string").
 			Bool("bool", true).
 			Int("int", int(-1)).
@@ -206,7 +206,7 @@ func TestAddKV(t *testing.T) {
 	})
 	t.Run("Array", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Strs("string", []string{"str1","str2"}).
 			Bools("bool", []bool{true,false}).
 			Ints("int", []int{-1, 2}).
@@ -228,7 +228,7 @@ func TestAddKV(t *testing.T) {
 	})
 	t.Run("EmptyArray", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false).With().
+		log := NewContext(out).
 			Strs("string", []string{}).
 			Bools("bool", []bool{}).
 			Ints("int", []int{}).
@@ -253,7 +253,7 @@ func TestAddKV(t *testing.T) {
 func TestAddKVInterface(t *testing.T) {
 	t.Run("KVPair", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		e := New(out, false).With().
+		e := NewContext(out).
 			Interface("interface", LogObj{"a":"aa","b":19,"d":19,"g":LogObj{"c":"c","d":[]int{1,2,3}}}).
 			Bool("bool", true).Logger().Debug()
 		e.Msg("done")
@@ -264,25 +264,25 @@ func TestAddKVInterface(t *testing.T) {
 func TestMsg(t *testing.T) {
 	t.Run("Debug", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		e := New(out, false).Debug()
+		e := NewLogger(out).Debug()
 		e.Msg("s1");
 		tResults("TestDebugStr", `{"l":"debug","m":"s1"}`+"\n", out, t)
 	})
 	t.Run("Info", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		e := New(out, false).Info()
+		e := NewLogger(out).Info()
 		e.Msg("s1");
 		tResults("TestInfoStr", `{"l":"info","m":"s1"}`+"\n", out, t)
 	})
 	t.Run("Warn", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		e := New(out, false).Warn()
+		e := NewLogger(out).Warn()
 		e.Msg("s1");
 		tResults("TestInfoStr", `{"l":"warn","m":"s1"}`+"\n", out, t)
 	})
 	t.Run("Error", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		e := New(out, false).Error()
+		e := NewLogger(out).Error()
 		e.Msg("s1");
 		tResults("TestInfoStr", `{"l":"error","m":"s1"}`+"\n", out, t)
 	})
@@ -292,7 +292,7 @@ func TestMsg(t *testing.T) {
 func TestLevel(t *testing.T) {
 	t.Run("SetGlobalLevel", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false)
+		log := NewLogger(out)
 		
 		SetGlobalLevel(LogDebug)
 		log.Error().Msg("s1");    tResults("SetGlobalLevel LogDebug", `{"l":"error","m":"s1"}`+"\n", out, t)
@@ -313,7 +313,7 @@ func TestLevel(t *testing.T) {
 	t.Run("level", func(t *testing.T) {
 		out := &bytes.Buffer{}
 		SetGlobalLevel(LogDebug)
-		log := New(out, false).Level(LogDebug)
+		log := NewLogger(out).Level(LogDebug)
 		log.Debug().Msg("s1");
 		tResults("level LogDebug", `{"l":"debug","m":"s1"}`+"\n", out, t)
 
@@ -366,7 +366,7 @@ func TestLevel(t *testing.T) {
 func TestFatal(t *testing.T) {
 	t.Run("Basic", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false)
+		log := New(out)
 		log.Fatal("m", "s1");    tResults("TestInfoStr", `{"l":"fatal","m":"s1"}`+"\n", out, t)
 	})
 }
@@ -374,7 +374,7 @@ func TestFatal(t *testing.T) {
 func TestPanic(t *testing.T) {
 	t.Run("Basic", func(t *testing.T) {
 		out := &bytes.Buffer{}
-		log := New(out, false)
+		log := New(out)
 		log.Panic("m", "s1");    tResults("TestInfoStr", `{"l":"panic","m":"s1"}`+"\n", out, t)
 	})
 }

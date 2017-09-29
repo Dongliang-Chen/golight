@@ -2,11 +2,11 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package responseheader
+package header
 
 import (
-	"net/http"
-	. "github.com/dlmc/golight/decorator"
+	"github.com/dlmc/golight/decorator"
+	"github.com/dlmc/golight/ghttp"
 )
 
 type HeaderMap map[string]string
@@ -18,9 +18,10 @@ type HeaderMap map[string]string
 //            existing values associated with key. 
 //	    false to set the associated key with the value. It replaces any existing
 //            values associated with key.
-func CreateDecor(hm HeaderMap, add bool) Decorator {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+func CreateDecor(hm HeaderMap, add bool) decorator.Decorator {
+	return func(next ghttp.Handler) ghttp.Handler {
+		return ghttp.HandlerFunc(func(c ghttp.Ctx, h *ghttp.Http) ghttp.Ctx{
+			w := h.W
 			if add {
 				for k,v := range hm {
 					w.Header().Add(k, v)
@@ -30,7 +31,7 @@ func CreateDecor(hm HeaderMap, add bool) Decorator {
 					w.Header().Set(k, v)
 				}
 			}
-			next.ServeHTTP(w, r)
+			return next.ServeHTTPWithCtx(c, h)
 		})
 	}		
 }

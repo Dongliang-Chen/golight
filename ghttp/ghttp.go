@@ -2,15 +2,62 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package router
+package ghttp
 
 import (
 	"net/http"
+	"net/url"
+	"context"
 	"sort"
 	"strings"
-	"github.com/dlmc/golight/ctx"
-
+	log "github.com/rs/zerolog"
 )
+
+
+type Response struct {
+	Code int       		`json:"code"`
+	Message string 		`json:"message,omitempty"`
+	Data interface{}    `json:"data,omitempty"`
+}
+
+type Http struct {
+	Resp  Response
+	Query url.Values
+	W http.ResponseWriter
+	R *http.Request
+	Log log.Context			//nil - use logging.Decor to assign the logger
+}	
+
+// Internal int key
+var ctxKeyIndex int = 0
+
+// GetNextCtxKey returns next available integer key for the Ctx
+func GetNextCtxKey() int {
+	//Do not expect the integer to wrap around ever happen
+	ctxKeyIndex++
+	return ctxKeyIndex
+}
+
+
+type Ctx interface {
+	context.Context
+}
+
+type Handler interface {
+	ServeHTTPWithCtx(Ctx, *Http) Ctx
+}
+
+type HandlerFunc func(Ctx, *Http) Ctx
+
+func (hf HandlerFunc) ServeHTTPWithCtx(c Ctx, h *Http) Ctx {
+    return hf(c, h)
+}
+
+func ChildCtx(parent Ctx, key, val interface{}) Ctx {
+	return context.WithValue(parent, key, val)
+}
+
+
 
 // Router impliments http handler registration
 // Usage example:
@@ -48,12 +95,14 @@ func main() {
 	log.Println(http.ListenAndServe(":8080", mux))
 }
 */
-type Router map[string]http.Handler
+//type Router map[string]http.Handler
+type Router map[string]Handler
 
 
 func (rt Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	if handler:=rt[r.Method]; handler != nil {
-		handler.ServeHTTP(w,ctx.InitRequestCtxMap(r))
+	if h:=rt[r.Method]; h != nil {
+		hp := &Http{W:w, R:r, Query:r.URL.Query()}
+		h.ServeHTTPWithCtx(context.Background(), hp)
 	} else {
 		//http.Error(w, http.StatusText(501), 501)
 		allow := []string{}
@@ -70,3 +119,38 @@ func (rt Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 }
+
+/*
+type valueCtx struct {
+	Context
+	key, val interface{}
+}
+
+type key int
+const requestIDKey key = 0
+
+type ResponseStruct struct {
+	Code int       		`json:"code"`
+	Message string 		`json:"message,omitempty"`
+	Data interface{}    `json:"data,omitempty"`
+}
+
+func (rs *ResponseStruct) xx(w http.ResponseWriter){
+	resp, _ := json.Marshal(rs)
+	w.WriteHeader(d.Code)
+	w.Write(resp)
+}
+
+
+
+func newContextWithRequestID(ctx context.Context, req *http.Request) context.Context {
+    return context.WithValue(ctx, requestIDKey, req.Header.Get("X-Request-ID"))
+}
+
+func requestIDFromContext(ctx context.Context) string {
+    return ctx.Value(requestIDKey).(string)
+}
+
+ctx := context.Background()
+ctx = newContextWithRequestID(ctx, req)
+*/
