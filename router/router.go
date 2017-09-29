@@ -8,6 +8,8 @@ import (
 	"net/http"
 	"sort"
 	"strings"
+	"github.com/dlmc/golight/ctx"
+
 )
 
 // Router impliments http handler registration
@@ -29,18 +31,29 @@ var postHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) 
 	w.Write([]byte("PostTestResponse"))
 })
 
+//Put http request handler
+type PutHandler struct {
+}
+func (ph *PutHandler) ServeHTTP (w http.ResponseWriter, r *http.Request) {
+	//decode request
+	//process request
+	//encode response
+	//write encoded response
+	w.Write([]byte("PutTestResponse"))
+}
 func main() {
 	mux := http.NewServeMux()
-	mux.Handle("/test", Router{"GET":getHandler, "POST":postHandler})
+	mux.Handle("/test", Router{"GET":getHandler, "POST":postHandler, "PUT":PutHanlder{}})
 	log.Println("Listening on port 8080...")
 	log.Println(http.ListenAndServe(":8080", mux))
 }
 */
 type Router map[string]http.Handler
 
+
 func (rt Router) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if handler:=rt[r.Method]; handler != nil {
-		handler.ServeHTTP(w,r)
+		handler.ServeHTTP(w,ctx.InitRequestCtxMap(r))
 	} else {
 		//http.Error(w, http.StatusText(501), 501)
 		allow := []string{}

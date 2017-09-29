@@ -1,22 +1,34 @@
+// Copyright 2017 The Golight Authors. All rights reserved.
+// Use of this source code is governed by a BSD-style
+// license that can be found in the LICENSE file.
 
-package router
+package router_test
 
 import (
 	"testing"
 	"net/http"
 	"io/ioutil"
 	"net/http/httptest"
+	"github.com/dlmc/golight/ctx"
+	rt "github.com/dlmc/golight/router"
 )
 
 
 //Get Http request handler function
 var getHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("GetHandler"))
+	m := ctx.GetCtxMap(r)
+	m["b"]=" 2"
+	str := "GetHandler" + m["b"].(string)
+		
+	w.Write([]byte(str))
 })
 
 //Post http request handler function
 var postHandler = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-	w.Write([]byte("PostHandler"))
+	m := ctx.GetCtxMap(r)
+	m["b"]=" 2"
+	str := "PostHandler" + m["b"].(string)
+	w.Write([]byte(str))
 })
 
 
@@ -37,7 +49,7 @@ func tResult(t *testing.T, res *http.Response, err error, want string) {
 
 //Simple test case for Router
 func TestRouterWithDefaultServeMux(t *testing.T) {
-	http.Handle("/test", Router{"GET":getHandler, "POST":postHandler})
+	http.Handle("/test", rt.Router{"GET":getHandler, "POST":postHandler})
 	ts := httptest.NewServer(http.DefaultServeMux)
 	defer ts.Close()
 	url := ts.URL+"/test"
@@ -49,16 +61,16 @@ func TestRouterWithDefaultServeMux(t *testing.T) {
 	tResult(t, res, err, "")
 
 	res,err = http.Get(url)
-	tResult(t, res, err, "GetHandler")
+	tResult(t, res, err, "GetHandler 2")
 
 	res,err = http.Post(url, "text/html; charset=utf-8", nil)
-	tResult(t, res, err, "PostHandler")
+	tResult(t, res, err, "PostHandler 2")
 }
 
 //Simple test case for Router
 func TestRouterWithNewMux(t *testing.T) {
 	mux := http.NewServeMux()
-	mux.Handle("/test", Router{"GET":getHandler, "POST":postHandler})
+	mux.Handle("/test", rt.Router{"GET":getHandler, "POST":postHandler})
 	
 	//use http.ListenAndServe(":3000", mux) for real http server
 	ts := httptest.NewServer(mux)
@@ -66,9 +78,9 @@ func TestRouterWithNewMux(t *testing.T) {
 	url := ts.URL+"/test"
 
 	res,err := http.Get(url)
-	tResult(t, res, err, "GetHandler")
+	tResult(t, res, err, "GetHandler 2")
 
 	res,err = http.Post(url, "text/html; charset=utf-8", nil)
-	tResult(t, res, err, "PostHandler")
+	tResult(t, res, err, "PostHandler 2")
 }
 
